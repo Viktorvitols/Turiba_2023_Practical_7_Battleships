@@ -6,8 +6,7 @@ public class Battlefield {
         createGrid();
     }
 
-    final String[] SHIP_ARRAY =
-            {"SSSS", "SSS", "SSS", "SS", "SS", "SS", "S", "S", "S", "S",};
+    final String[] SHIP_ARRAY = {"SSSS", "SSS", "SSS", "SS", "SS", "SS", "S", "S", "S", "S",};
     public String[][] grid;
 
     public void createGrid() {
@@ -22,6 +21,7 @@ public class Battlefield {
     public void drawBattlefield() {
         System.out.println("   A|B|C|D|E|F|G|H|I|J| ");
         for (int i = 0; i < grid.length; i++) {
+
             if (i < 9) {
                 System.out.print(" " + (i + 1) + "[");
             } else {
@@ -76,9 +76,7 @@ public class Battlefield {
             coords[1] = charMapping(coordV) - 1;
             coords[2] = charMapping(shipDir);
         } else {
-            System.out.println("Enter a letter V or H to place a ship vertically or horizontally, " +
-                    "letter A to J and a number 1 - 10 " +
-                    "(e.g. HD5)");
+            System.out.println("Enter a letter 'V' or 'H' to place a ship vertically or horizontally, letter A to J and a number 1 - 10 (e.g. HD5)");
             inputParsing();
         }
         return coords;
@@ -87,8 +85,7 @@ public class Battlefield {
     public void setUpFleet() {
         Integer[] coords = null;
         for (int shipNo = 0; shipNo < SHIP_ARRAY.length; ) {
-            System.out.println("\nEnter coordinates for " + SHIP_ARRAY[shipNo].length() +
-                    "-square(s) ship № " + (shipNo + 1) + ":");
+            System.out.println("\nEnter coordinates for " + SHIP_ARRAY[shipNo].length() + "-square(s) ship № " + (shipNo + 1) + ":");
             coords = inputParsing();
             if (setShip(coords, shipNo)) {
                 drawBattlefield();
@@ -102,22 +99,20 @@ public class Battlefield {
         int col = coords[1];
         int shipDir = coords[2];
         String ship = SHIP_ARRAY[shipIndex];
-        String[][] tempGrid = grid.clone();
 
-        if (canSet(coords)) {
+        if (canSet(coords, ship.length())) {
             try {
-                if (shipDir == 0) { //Vertical
+                if (shipDir == 0) { // Vertical ships
                     for (int i = 0; i < ship.length(); i++) {
-                        tempGrid[row][col] = ship.substring(i, i + 1);
+                        grid[row][col] = ship.substring(i, i + 1);
                         row++;
                     }
-                } else { //Horizontal
+                } else { // Horizontal ships
                     for (int i = 0; i < ship.length(); i++) {
-                        tempGrid[row][col] = ship.substring(i, i + 1);
+                        grid[row][col] = ship.substring(i, i + 1);
                         col++;
                     }
                 }
-                grid = tempGrid;
                 return true;
             } catch (ArrayIndexOutOfBoundsException e) {
                 System.out.println("You can't place this ship here");
@@ -126,18 +121,32 @@ public class Battlefield {
         return false;
     }
 
-    public Boolean canSet(Integer[] coords) {
+    public Boolean canSet(Integer[] coords, int shipLength) {
         int row = coords[0];
         int col = coords[1];
+        int shipDir = coords[2];
+        int colLength;
+        int rowLength;
 
-        Integer[] rowsToCheck = new Integer[3];
-        Integer[] colsToCheck = new Integer[3];
-        rowsToCheck[0] = row;
-        rowsToCheck[1] = row - 1;
-        rowsToCheck[2] = row + 1;
-        colsToCheck[0] = col;
-        colsToCheck[1] = col - 1;
-        colsToCheck[2] = col + 1;
+        // Indicating indexes to check if you can place a ship there
+        if (shipDir == 0) {
+            rowLength = shipLength + 2;
+            colLength = 3;
+        } else {
+            rowLength = 3;
+            colLength = shipLength + 2;
+        }
+
+        Integer[] colsToCheck = new Integer[colLength];
+        Integer[] rowsToCheck = new Integer[rowLength];
+
+        for (int i = 0; i < rowsToCheck.length; i++) {
+            rowsToCheck[i] = (row - 1) + i;
+        }
+        for (int i = 0; i < colsToCheck.length; i++) {
+            colsToCheck[i] = (col - 1) + i;
+        }
+
 
         for (int i = 0; i < rowsToCheck.length; i++) {
             if (rowsToCheck[i] < 0) {
@@ -155,6 +164,7 @@ public class Battlefield {
             }
         }
 
+        // Checking if there is another ship around
         for (int i = 0; i < rowsToCheck.length; i++) {
             for (int j = 0; j < colsToCheck.length; j++) {
                 if ((grid[rowsToCheck[i]][colsToCheck[j]]).equals("S")) {
@@ -162,6 +172,17 @@ public class Battlefield {
                     return false;
                 }
             }
+        }
+
+        // Checking if the whole ship is inside the field
+        if (shipDir == 0 && row + shipLength > 10) {
+            System.out.println("Out of bounds. Choose another place.");
+            return false;
+        }
+
+        if (shipDir != 0 && col + shipLength > 10) {
+            System.out.println("Out of bounds. Choose another place.");
+            return false;
         }
         return true;
     }
