@@ -64,29 +64,27 @@ public class Battlefield {
     }
 
     public Integer[] inputParsing() {
-        String input = null;
         Integer[] coords = new Integer[3];
         Scanner scanner = new Scanner(System.in);
         if (scanner.hasNext("[VHvh][ABCDEFGHIJabcdefghij]([1-9])(0?)")) {
-            input = scanner.next();
+            String input = scanner.next();
             String shipDir = input.toUpperCase().substring(0, 1);
             String coordV = input.toUpperCase().substring(1, 2);
             String coordH = input.toUpperCase().substring(2);
             coords[0] = Integer.valueOf(coordH) - 1;
             coords[1] = charMapping(coordV) - 1;
             coords[2] = charMapping(shipDir);
+            return coords;
         } else {
             System.out.println("Enter a letter 'V' or 'H' to place a ship vertically or horizontally, letter A to J and a number 1 - 10 (e.g. HD5)");
-            inputParsing();
+            return inputParsing();
         }
-        return coords;
     }
 
     public void setUpFleet() {
-        Integer[] coords = null;
         for (int shipNo = 0; shipNo < SHIP_ARRAY.length; ) {
             System.out.println("\nEnter coordinates for " + SHIP_ARRAY[shipNo].length() + "-square(s) ship № " + (shipNo + 1) + ":");
-            coords = inputParsing();
+            Integer[] coords = inputParsing();
             if (setShip(coords, shipNo)) {
                 drawBattlefield();
                 shipNo++;
